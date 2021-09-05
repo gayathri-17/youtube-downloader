@@ -35,44 +35,53 @@ const App = () => {
     setText(text)
   }
   const downloadURL = async () => {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      {
-        title: 'Storage Permission Required',
-        message:
-          'Application needs access to your storage to download File',
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission Required',
+          message:
+            'Application needs access to your storage to download File',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        // Start downloading
+        downloadFile();
       }
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      // Start downloading
-      downloadFile();
+    } catch (e) {
+      alert(JSON.stringify(e))
     }
   }
   const downloadFile = async () => {
+    try {
 
-    const youtubeURL = text;
-    const urls = await ytdl(youtubeURL, { quality: 'highest' });
-    console.log("======urls", urls[0].url)
-    const downURL = urls[0].url
-
-    const { config, fs } = RNFetchBlob
-    let date = new Date()
-    // console.log('===========fs', fs.dirs)
-    let DownloadDir = fs.dirs.DownloadDir // this is the pictures directory. You can check the available directories in the wiki.
-    let options = {
-      fileCache: true,
-      appendExt: '.mp4',
-      addAndroidDownloads: {
-        useDownloadManager: true, // setting it to true will use the device's native download manager and will be shown in the notification bar.
-        notification: true,
-        path: DownloadDir + "/video" + Math.floor(date.getTime() + date.getSeconds() / 2) +'.mp4', // this is the path where your downloaded file will live in
-        description: 'Downloading video.'
+      const youtubeURL = text;
+      const urls = await ytdl(youtubeURL, { quality: 'highest' });
+      console.log("======urls", urls[0].url)
+      const downURL = urls[0].url
+      const { config, fs } = RNFetchBlob
+      let date = new Date()
+      // console.log('===========fs', fs.dirs)
+      let DownloadDir = fs.dirs.DownloadDir // this is the pictures directory. You can check the available directories in the wiki.
+      let options = {
+        fileCache: true,
+        appendExt: '.mp4',
+        addAndroidDownloads: {
+          useDownloadManager: true, // setting it to true will use the device's native download manager and will be shown in the notification bar.
+          notification: true,
+          path: DownloadDir + "/video" + Math.floor(date.getTime() + date.getSeconds() / 2) + '.mp4', // this is the path where your downloaded file will live in
+          description: 'Downloading video.'
+        }
       }
+      console.log('=========PictureDir', DownloadDir)
+      config(options).fetch('GET', downURL).then((res) => {
+        console.log('===========res', res)
+      })
+    } catch (e) {
+      console.log(e)
+      alert(JSON.stringify(e))
+      throw e
     }
-    console.log('=========PictureDir', DownloadDir)
-    config(options).fetch('GET', downURL).then((res) => {
-      console.log('===========res', res)
-    })
 
   }
 
